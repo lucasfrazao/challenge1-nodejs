@@ -48,16 +48,35 @@ app.get("/todos", checksExistsUserAccount, (request, response) => {
 });
 
 app.post("/todos", checksExistsUserAccount, (request, response) => {
+  const { username } = request;
   const { title, deadline } = request.body;
 
-  return response.status(201).send({
+  username.todos.push({
+    id: uuidv4(),
     title,
-    deadline,
+    done: false,
+    deadline: new Date(deadline),
+    created_at: new Date(),
   });
+
+  return response.status(201).json("Todo was created successfully!");
 });
 
 app.put("/todos/:id", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { id } = request.params;
+  const { title, deadline } = request.body;
+
+  const { username } = request;
+  const { todos } = username;
+
+  const todo = todos.find((todo) => todo.id === id);
+
+  if (!todo) return response.status(404).json({ error: "Todo not found!" });
+
+  todo.title = title;
+  todo.deadline = new Date(deadline);
+
+  return response.json(todo);
 });
 
 app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
